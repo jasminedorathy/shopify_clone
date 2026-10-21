@@ -9,6 +9,22 @@ import "./home-page.css";
 function LetterReveal({ children, className = "" }: { children: string; className?: string }) { return <span className={`motion-letter-reveal ${className}`} aria-label={children}>{children.split("").map((letter, index) => <motion.span key={`${letter}-${index}`} initial={{ opacity: 0, y: 18, x: index % 2 ? 8 : -8, filter: "blur(7px)" }} whileInView={{ opacity: 1, y: 0, x: 0, filter: "blur(0px)" }} viewport={{ once: true, amount: 0.65 }} transition={{ delay: index * 0.018, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>{letter === " " ? "\u00a0" : letter}</motion.span>)}</span>; }
 function Wordmark() { return <a className="story-wordmark" href="/" aria-label="Shopify Clone home"><span className="story-wordmark-mark">SC</span><span>SHOPIFY CLONE</span></a>; }
 
+function smoothScrollToTop() {
+  const start = window.scrollY;
+  const duration = 1000;
+  const startTime = performance.now();
+
+  const animate = (currentTime: number) => {
+    const progress = Math.min((currentTime - startTime) / duration, 1);
+    const easedProgress = 1 - Math.pow(1 - progress, 3);
+    window.scrollTo(0, Math.round(start * (1 - easedProgress)));
+
+    if (progress < 1) requestAnimationFrame(animate);
+  };
+
+  requestAnimationFrame(animate);
+}
+
 export default function HomePage() {
   const horizontalRef = useRef<HTMLElement>(null);
   const horizontalWrapRef = useRef<HTMLDivElement>(null);
@@ -49,6 +65,6 @@ export default function HomePage() {
     <section className="story-marquee" aria-label="Commerce principles"><div><span>CLARITY</span><i>✳</i><span>MOMENTUM</span><i>✳</i><span>CRAFT</span><i>✳</i><span>CLARITY</span><i>✳</i></div></section>
     <section className="story-proof"><div><p className="story-section-label">/ THE FOUNDATION</p><h2><LetterReveal>Quietly powerful.</LetterReveal><br /><em><LetterReveal>Deliberately yours.</LetterReveal></em></h2></div><div className="story-proof-list"><p><Check /> Multi-tenant from the ground up</p><p><Check /> Inventory that knows the truth</p><p><Check /> Checkout built for confidence</p><p><Check /> An interface that stays out of your way</p></div></section>
     <section className="story-cta"><div className="story-cta-orb" aria-hidden="true" /><div className="story-cta-type-orbit story-cta-type-orbit-one" aria-hidden="true"><span>BUILD WITH INTENTION</span><span>BUILD WITH INTENTION</span></div><div className="story-cta-type-orbit story-cta-type-orbit-two" aria-hidden="true"><span>MAKE IT MATTER</span><span>MAKE IT MATTER</span></div><div className="story-cta-spark story-cta-spark-one" aria-hidden="true" /><div className="story-cta-spark story-cta-spark-two" aria-hidden="true" /><p className="story-section-label">/ YOUR NEXT CHAPTER</p><h2>Ready to make<br /><em>something matter?</em></h2><p>Open the workspace and see what your commerce operation can feel like.</p><a className="story-button story-button-primary" href="/merchant">Enter Shopify Clone <ArrowUpRight /></a></section>
-    <footer className="story-footer"><div className="story-footer-top"><div><Wordmark /><p>Commerce, with character.<br /><em>Built for the next good idea.</em></p></div><div className="story-footer-orbit" aria-hidden="true"><span>SC</span><i /></div><div className="story-footer-links"><span>EXPLORE</span><a href="#motion">How it works</a><a href="#principles">Principles</a><a href="/stores/artisan-store">Storefront</a></div><div className="story-footer-links"><span>OPEN A DOOR</span><a href="/merchant">Dashboard <ArrowUpRight /></a><a href="mailto:hello@example.com">Say hello <ArrowUpRight /></a></div></div><div className="story-footer-bottom"><span>© 2026 SHOPIFY CLONE / MADE WITH INTENTION</span><span className="story-footer-status"><i /> ALL SYSTEMS NOMINAL</span><div><a href="#story-title">Back to top ↑</a><a href="/merchant">Enter workspace ↗</a></div></div></footer>
+    <footer className="story-footer"><div className="story-footer-top"><div><Wordmark /><p>Commerce, with character.<br /><em>Built for the next good idea.</em></p></div><div className="story-footer-orbit" aria-hidden="true"><span>SC</span><i /></div><div className="story-footer-links"><span>EXPLORE</span><a href="#motion">How it works</a><a href="#principles">Principles</a><a href="/stores/artisan-store">Storefront</a></div><div className="story-footer-links"><span>OPEN A DOOR</span><a href="/merchant">Dashboard <ArrowUpRight /></a><a href="mailto:hello@example.com">Say hello <ArrowUpRight /></a></div></div><div className="story-footer-bottom"><span>© 2026 SHOPIFY CLONE / MADE WITH INTENTION</span><span className="story-footer-status"><i /> ALL SYSTEMS NOMINAL</span><div><a href="#story-title" onClick={(event) => { event.preventDefault(); smoothScrollToTop(); }}>Back to top ↑</a><a href="/merchant">Enter workspace ↗</a></div></div></footer>
   </main>;
 }
