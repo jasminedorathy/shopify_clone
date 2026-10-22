@@ -9,7 +9,11 @@ import "./home-page.css";
 function LetterReveal({ children, className = "" }: { children: string; className?: string }) { return <span className={`motion-letter-reveal ${className}`} aria-label={children}>{children.split("").map((letter, index) => <motion.span key={`${letter}-${index}`} initial={{ opacity: 0, y: 18, x: index % 2 ? 8 : -8, filter: "blur(7px)" }} whileInView={{ opacity: 1, y: 0, x: 0, filter: "blur(0px)" }} viewport={{ once: true, amount: 0.65 }} transition={{ delay: index * 0.018, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>{letter === " " ? "\u00a0" : letter}</motion.span>)}</span>; }
 function Wordmark() { return <a className="story-wordmark" href="/" aria-label="Shopify Clone home"><span className="story-wordmark-mark">SC</span><span>SHOPIFY CLONE</span></a>; }
 
+let scrollAnimationFrame = 0;
+
 function smoothScrollToTop() {
+  cancelAnimationFrame(scrollAnimationFrame);
+
   const start = window.scrollY;
   const duration = 1000;
   const startTime = performance.now();
@@ -17,12 +21,18 @@ function smoothScrollToTop() {
   const animate = (currentTime: number) => {
     const progress = Math.min((currentTime - startTime) / duration, 1);
     const easedProgress = 1 - Math.pow(1 - progress, 3);
-    window.scrollTo(0, Math.round(start * (1 - easedProgress)));
+    window.scrollTo({ top: Math.round(start * (1 - easedProgress)), left: 0, behavior: "auto" });
 
-    if (progress < 1) requestAnimationFrame(animate);
+    if (progress < 1) {
+      scrollAnimationFrame = requestAnimationFrame(animate);
+    } else {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
   };
 
-  requestAnimationFrame(animate);
+  scrollAnimationFrame = requestAnimationFrame(animate);
 }
 
 export default function HomePage() {
