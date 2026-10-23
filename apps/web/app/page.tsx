@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight, Check, CircleDot, Menu, Sparkles, Zap } from "lucide-react";
 import { ThemeModeToggle } from "@/components/theme-mode-toggle";
 import "./home-page.css";
@@ -58,7 +58,7 @@ export default function HomePage() {
     return () => { observer.disconnect(); cancelAnimationFrame(frame); window.clearTimeout(delayedMeasure); window.removeEventListener("resize", measure); };
   }, []);
   const { scrollYProgress } = useScroll({ target: horizontalRef, offset: ["start start", "end end"] });
-  const horizontalX = useSpring(useTransform(scrollYProgress, [0, 1], [0, -horizontalDistance]), { stiffness: 90, damping: 24, mass: 0.7 });
+  const horizontalX = useTransform(scrollYProgress, [0, 1], [0, -horizontalDistance]);
   return <main className="story-landing">
     <header className="story-nav"><div className="story-nav-left"><Wordmark /><span className="story-nav-signal"><i /> LIVE SYSTEM <b>●</b></span></div><nav aria-label="Primary navigation"><a href="#motion"><span className="story-nav-index">01</span>How it works</a><a href="#principles"><span className="story-nav-index">02</span>Principles</a><a href="/stores/artisan-store/products"><span className="story-nav-index">03</span>Storefront</a><ThemeModeToggle /><a className="story-nav-cta" href="/merchant">Open dashboard <ArrowUpRight /></a></nav><button className="story-mobile-menu" type="button" aria-label="Open navigation"><Menu /></button></header>
 
