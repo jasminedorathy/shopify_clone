@@ -48,13 +48,14 @@ export default function HomePage() {
       setHorizontalDistance(Math.max(0, track.scrollWidth - wrap.clientWidth));
     };
     measure();
-    const frame = requestAnimationFrame(measure);
+    const frame = requestAnimationFrame(() => requestAnimationFrame(measure));
     const delayedMeasure = window.setTimeout(measure, 250);
-    document.fonts?.ready.then(measure);
+    document.fonts?.ready.then(() => requestAnimationFrame(measure));
+    window.addEventListener("resize", measure);
     const observer = new ResizeObserver(measure);
     if (horizontalWrapRef.current) observer.observe(horizontalWrapRef.current);
     if (horizontalTrackRef.current) observer.observe(horizontalTrackRef.current);
-    return () => { observer.disconnect(); cancelAnimationFrame(frame); window.clearTimeout(delayedMeasure); };
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); window.clearTimeout(delayedMeasure); window.removeEventListener("resize", measure); };
   }, []);
   const { scrollYProgress } = useScroll({ target: horizontalRef, offset: ["start start", "end end"] });
   const horizontalX = useSpring(useTransform(scrollYProgress, [0, 1], [0, -horizontalDistance]), { stiffness: 90, damping: 24, mass: 0.7 });
