@@ -2,163 +2,31 @@
 
 import React, { type ReactNode, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ShoppingBag } from "lucide-react";
-import { ThemeModeToggle } from "../theme-mode-toggle";
+import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import { ThemeModeToggle } from "../theme-mode-toggle";
 import { useOptionalCart } from "../../context/cart-context";
 
-const CartDrawer = dynamic(
-  () => import("./cart/cart-drawer").then((mod) => mod.CartDrawer),
-  { ssr: false }
-);
+const CartDrawer = dynamic(() => import("./cart/cart-drawer").then((mod) => mod.CartDrawer), { ssr: false });
+export interface StorefrontNavLink { label: string; href: string }
+export interface StorefrontShellProps { children: ReactNode; storeName: string; storeSlug?: string; cartItemCount?: number; announcement?: string; navLinks?: StorefrontNavLink[]; onCartClick?: () => void }
 
-export interface StorefrontNavLink {
-  label: string;
-  href: string;
-}
-
-export interface StorefrontShellProps {
-  children: ReactNode;
-  storeName: string;
-  storeSlug?: string;
-  cartItemCount?: number;
-  announcement?: string;
-  navLinks?: StorefrontNavLink[];
-  onCartClick?: () => void;
-}
-
-export function StorefrontShell({
-  children,
-  storeName,
-  storeSlug,
-  cartItemCount,
-  announcement,
-  navLinks = [
-    { label: "Products", href: storeSlug ? `/stores/${storeSlug}/products` : "/products" },
-    { label: "Collections", href: storeSlug ? `/stores/${storeSlug}/collections` : "/collections" },
-    { label: "About", href: storeSlug ? `/stores/${storeSlug}/about` : "/about" },
-  ],
-  onCartClick,
-}: StorefrontShellProps) {
-  const storeHomeHref = storeSlug ? `/stores/${storeSlug}` : "/";
+export function StorefrontShell({ children, storeName, storeSlug, cartItemCount, announcement = "Free shipping on orders over $75", navLinks = [{ label: "Shop all", href: storeSlug ? `/stores/${storeSlug}/products` : "/products" }, { label: "Collections", href: storeSlug ? `/stores/${storeSlug}/collections` : "/collections" }, { label: "Our story", href: storeSlug ? `/stores/${storeSlug}/about` : "/about" }], onCartClick }: StorefrontShellProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
-  const cartContext = useOptionalCart();
-  const effectiveCount = cartItemCount !== undefined ? cartItemCount : (cartContext?.itemCount ?? 0);
-  const handleCartClick = onCartClick || cartContext?.openDrawer;
-
-  return (
-    <div className="storefront-layout story-storefront">
-      {/* Announcement Banner */}
-      {announcement && (
-        <aside className="storefront-announcement" role="region" aria-label="Announcement">
-          {announcement}
-        </aside>
-      )}
-
-      {/* Storefront Header */}
-      <header className="storefront-header" role="banner">
-        <div className="storefront-header-inner">
-          {/* Brand Logo / Store Name */}
-          <div className="storefront-brand">
-            <a href={storeHomeHref} className="storefront-brand-name">
-              {storeName}
-            </a>
-          </div>
-
-          {/* Navigation Links */}
-          <nav id="storefront-navigation" className={`storefront-nav ${isMenuOpen ? "is-open" : ""}`} aria-label="Storefront Navigation">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="storefront-nav-link" onClick={() => setIsMenuOpen(false)}>
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          <button
-            type="button"
-            className="storefront-menu-toggle"
-            aria-expanded={isMenuOpen}
-            aria-controls="storefront-navigation"
-            aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
-            onClick={() => setIsMenuOpen((open) => !open)}
-          >
-            <span /><span /><span />
-          </button>
-
-          {/* Store Actions / Cart */}
-          <div className="storefront-actions">
-            <ThemeModeToggle />
-            {storeSlug && (
-              <a
-                href={`/stores/${storeSlug}/account`}
-                className="btn btn-outline btn-sm"
-                aria-label="Customer Account"
-                style={{ textDecoration: "none" }}
-              >
-                Account
-              </a>
-            )}
-            <button
-              type="button"
-              className="btn btn-outline btn-sm storefront-cart-btn"
-              onClick={handleCartClick}
-              aria-label={`Shopping cart with ${effectiveCount} items`}
-              data-testid="storefront-cart-button"
-            >
-              <span className="storefront-cart-label"><ShoppingBag aria-hidden="true" /> Cart</span>
-              {effectiveCount > 0 && (
-                <span className="storefront-cart-count" aria-hidden="true">
-                  {effectiveCount}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <motion.main
-        className="storefront-main"
-        role="main"
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, ease: "easeOut" }}
-      >
-        {children}
-      </motion.main>
-
-      {/* Storefront Footer */}
-      <footer className="storefront-footer" role="contentinfo">
-        <div className="storefront-footer-inner">
-          <div className="storefront-footer-top">
-            <div>
-              <h3>{storeName}</h3>
-              <p>Your one-stop shop for quality products.</p>
-            </div>
-            <div>
-              <h4>Quick Links</h4>
-              <ul className="storefront-nav-list" style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                {navLinks.map((link) => (
-                  <li key={link.href} style={{ marginBottom: "var(--space-2)" }}>
-                    <a href={link.href} className="storefront-nav-link">
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="storefront-footer-bottom">
-            <span>© {new Date().getFullYear()} {storeName}. All rights reserved.</span>
-            <span>Powered by Shopify Clone</span>
-          </div>
-        </div>
-      </footer>
-
-      {/* Cart Drawer Overlay (active if CartProvider is mounted) */}
-      {cartContext && <CartDrawer storeSlug={storeSlug} />}
-    </div>
-  );
+  const reduced = useReducedMotion();
+  const cart = useOptionalCart();
+  const count = cartItemCount ?? cart?.itemCount ?? 0;
+  const home = storeSlug ? `/stores/${storeSlug}` : "/";
+  return <div className="storefront-layout story-storefront">
+    <aside className="storefront-announcement" aria-label="Store announcement"><span>●</span> {announcement} <span>●</span></aside>
+    <header className="storefront-header"><div className="storefront-header-inner">
+      <button className="storefront-menu-toggle" type="button" aria-label={isMenuOpen ? "Close menu" : "Open menu"} aria-expanded={isMenuOpen} onClick={() => setIsMenuOpen((v) => !v)}>{isMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
+      <a href={home} className="storefront-brand-name" aria-label={`${storeName} home`}><span className="storefront-brand-mark">S</span><span>{storeName}</span></a>
+      <nav className={`storefront-nav ${isMenuOpen ? "is-open" : ""}`} aria-label="Main navigation">{navLinks.map((link) => <a key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)}>{link.label}</a>)}</nav>
+      <div className="storefront-actions"><button className="storefront-icon-button" type="button" aria-label="Search"><Search aria-hidden="true" /></button><ThemeModeToggle />{storeSlug && <a href={`/stores/${storeSlug}/account`} className="storefront-account-link">Account</a>}<button type="button" className="storefront-cart-btn" onClick={onCartClick || cart?.openDrawer} aria-label={`Shopping bag with ${count} items`}><ShoppingBag aria-hidden="true" /><span>Bag</span>{count > 0 && <b>{count}</b>}</button></div>
+    </div></header>
+    <motion.main className="storefront-main" initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduced ? 0 : .45 }}>{children}</motion.main>
+    <footer className="storefront-footer"><div className="storefront-footer-inner"><div className="storefront-footer-top"><div><a href={home} className="storefront-footer-brand">{storeName}</a><p>Everyday pieces, made to be lived in.</p></div><div><h4>Explore</h4>{navLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</div><div><h4>Customer care</h4>{storeSlug && <a href={`/stores/${storeSlug}/account`}>My account</a>}<a href={storeSlug ? `/stores/${storeSlug}/about` : "/about"}>Contact & returns</a></div></div><div className="storefront-footer-bottom"><span>© {new Date().getFullYear()} {storeName}</span><span>Thoughtfully made for your everyday.</span></div></div></footer>
+    {cart && <CartDrawer storeSlug={storeSlug} />}
+  </div>;
 }

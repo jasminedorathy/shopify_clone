@@ -47,7 +47,7 @@ export function ProductCard({
   const isAvailable = product.variantsCount > 0;
 
   return (
-    <article className="storefront-product-card card" data-testid="product-card">
+    <article className="storefront-product-card" data-testid="product-card">
       {/* Product Image / Fallback Container */}
       <a
         href={productHref}
