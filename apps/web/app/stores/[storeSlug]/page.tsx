@@ -1,7 +1,7 @@
 "use client";
 
 import React, { use, useCallback, useEffect, useState } from "react";
-import { ArrowRight, Check, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Check, LoaderCircle, Sparkles, Star } from "lucide-react";
 import type { ProductSummaryDTO } from "@shopify-clone/products";
 import { StorefrontShell } from "../../../src/components/storefront/StorefrontShell";
 import { ProductCard } from "../../../src/components/storefront/products/product-card";
@@ -21,9 +21,11 @@ export default function StorefrontRootPage({ params }: StorefrontPageProps) {
   const { storeSlug } = use(params);
   const [store, setStore] = useState<StorefrontCatalogResponse["store"] | null>(null);
   const [products, setProducts] = useState<ProductSummaryDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchCatalog = useCallback(async () => {
+    setIsLoading(true);
     try {
       const data = await apiClient.get<StorefrontCatalogResponse>(
         `/api/v1/storefront/${encodeURIComponent(storeSlug)}/products`,
@@ -31,8 +33,11 @@ export default function StorefrontRootPage({ params }: StorefrontPageProps) {
       );
       setStore(data.store);
       setProducts(data.items);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Unable to load storefront"));
+    } finally {
+      setIsLoading(false);
     }
   }, [storeSlug]);
 
@@ -63,7 +68,7 @@ export default function StorefrontRootPage({ params }: StorefrontPageProps) {
 
         <section className="storefront-featured" aria-labelledby="featured-title">
           <div className="storefront-section-heading"><div><span className="storefront-eyebrow">The edit</span><h2 id="featured-title">Favourites, for good reason.</h2></div><a className="storefront-text-link" href={`/stores/${encodeURIComponent(storeSlug)}/products`}>View all <ArrowRight data-icon="inline-end" /></a></div>
-          {error ? <div className="storefront-home-error"><h3>Products are taking a moment.</h3><button className="btn btn-outline btn-sm" onClick={fetchCatalog}>Try again</button></div> : products.length ? <div className="storefront-featured-grid">{products.slice(0, 4).map((product) => <ProductCard key={product.id} product={product} storeSlug={storeSlug} storeCurrency={store?.currency} />)}</div> : <div className="storefront-empty-featured"><Star aria-hidden="true" /><p>Your first collection is coming soon.</p></div>}
+          {isLoading ? <div className="storefront-home-loading" aria-live="polite"><LoaderCircle aria-hidden="true" /><span>Loading the latest edit...</span></div> : error ? <div className="storefront-home-error"><h3>Products are taking a moment.</h3><button className="btn btn-outline btn-sm" onClick={fetchCatalog}>Try again</button></div> : products.length ? <div className="storefront-featured-grid">{products.slice(0, 4).map((product) => <ProductCard key={product.id} product={product} storeSlug={storeSlug} storeCurrency={store?.currency} />)}</div> : <div className="storefront-empty-featured"><Star aria-hidden="true" /><p>Your first collection is coming soon.</p></div>}
         </section>
 
         <section className="storefront-quote"><div className="storefront-quote-stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>“The kind of shop that makes you want to refresh your whole space.”</blockquote><span>— A happy customer</span></section>

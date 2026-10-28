@@ -1,7 +1,7 @@
 "use client";
 
-import React, { type ReactNode } from "react";
-import { motion } from "framer-motion";
+import React, { type ReactNode, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
 import { ThemeModeToggle } from "../theme-mode-toggle";
 import dynamic from "next/dynamic";
@@ -41,6 +41,8 @@ export function StorefrontShell({
   onCartClick,
 }: StorefrontShellProps) {
   const storeHomeHref = storeSlug ? `/stores/${storeSlug}` : "/";
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
   const cartContext = useOptionalCart();
   const effectiveCount = cartItemCount !== undefined ? cartItemCount : (cartContext?.itemCount ?? 0);
   const handleCartClick = onCartClick || cartContext?.openDrawer;
@@ -65,13 +67,24 @@ export function StorefrontShell({
           </div>
 
           {/* Navigation Links */}
-          <nav className="storefront-nav" aria-label="Storefront Navigation">
+          <nav id="storefront-navigation" className={`storefront-nav ${isMenuOpen ? "is-open" : ""}`} aria-label="Storefront Navigation">
             {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="storefront-nav-link">
+              <a key={link.href} href={link.href} className="storefront-nav-link" onClick={() => setIsMenuOpen(false)}>
                 {link.label}
               </a>
             ))}
           </nav>
+
+          <button
+            type="button"
+            className="storefront-menu-toggle"
+            aria-expanded={isMenuOpen}
+            aria-controls="storefront-navigation"
+            aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
+            onClick={() => setIsMenuOpen((open) => !open)}
+          >
+            <span /><span /><span />
+          </button>
 
           {/* Store Actions / Cart */}
           <div className="storefront-actions">
@@ -108,9 +121,9 @@ export function StorefrontShell({
       <motion.main
         className="storefront-main"
         role="main"
-        initial={{ opacity: 0, y: 10 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, ease: "easeOut" }}
       >
         {children}
       </motion.main>
